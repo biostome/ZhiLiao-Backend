@@ -1,0 +1,40 @@
+erDiagram
+  TASKS ||--o{ TASK_LABELS : has
+  LABELS ||--o{ TASK_LABELS : has
+  TASKS ||--o{ TASK_DEPENDENCIES : "edges out"
+  TASKS ||--o{ TASK_DEPENDENCIES : "edges in"
+
+  TASKS {
+    string id PK "uuid string"
+    string title
+    text description
+    enum priority "red|yellow|green"
+    enum status "todo|in_progress|done"
+    string channel
+    string subcategory
+    string assigned_to_user_id
+    string created_by_user_id
+    datetime start_at
+    datetime due_at
+    datetime completed_at
+    datetime created_at
+    datetime updated_at
+  }
+
+  LABELS {
+    string id PK
+    string name UNIQUE
+    datetime created_at
+  }
+
+  TASK_LABELS {
+    string task_id FK
+    string label_id FK
+  }
+
+  TASK_DEPENDENCIES {
+    string id PK
+    string src_task_id FK
+    string dst_task_id FK
+    enum relation_type "precedes|parallel|mutex"
+  }
