@@ -1,60 +1,58 @@
-# Rino体系IPC的SDK
-## 前提
-@Rino/rino-panel-sdk最低需要@1.1.4版本
-## Suopoort
+# 任务管理服务（Task Management Service）
 
-# 核心概念
-### client: 
-- IPC客户端实例, 一般来说每台设备都对应这一个client, 然后可以通过client调用所有的ipc业务, 如控制播放, 查询回放记录, 通过rtc通道发送数据等
-- 可以初始化项目时通过```RinoIPCSDK.createClient```创建一个client
-- 可以通过```RinoIPCSDK.getClient(devId)```获取已经创建的client
+本仓库包含后端服务 `task_manager`，提供任务的存储、管理、检索与依赖关系等 REST API，基于 FastAPI 构建。
 
-### playType:
-- client的许多api都需要传递这个参数, 这个参数是用来告诉client需要处理针对什么场景的业务, 比如直播时传递"live", 回放时传递"playback"
+- 技术栈：FastAPI + SQLAlchemy + Pydantic + SQLite（默认）/ PostgreSQL（生产推荐）
+- 详细文档：请查看 `task_manager/README.md`（中文）与 `task_manager/README_EN.md`（English）
 
+---
 
-# 使用教程
-``` tsx
-// 初始化项目时使用SDK初始化一个client
-try {
-    RinoIPCSDK.createClient(devInfo.devId, devInfo.uuid!, devInfo.ipcCameraNum!, devInfo.rtcType || 'agora' as any);
-} catch (e) {
-    console.error("createClient fail", e);
-}
+## 快速开始
 
-const client = RinoIPCSDK.getClient(devId);
+1) 进入服务目录并初始化环境（macOS/Linux）
+```bash
+cd task_manager
+bash scripts/setup.sh
+```
 
-// 调用拍照api拍摄直播流
-client.snapShot(playType, curSelectedCameraIdx, `${dirPath}/${curSelectedCameraIdx}-${Date.now()}.jpg`)
+2) 运行测试
+```bash
+bash scripts/test.sh  # 预期看到 3 passed
+```
 
-// 通过client.event可以订阅client的IPC相关业务事件
-const subscription = client.event.subscribeOnSnapShot((data){});
-subscription.remove(); // 取消订阅
+3) 启动开发服务
+```bash
+bash scripts/dev.sh
+# 打开 http://127.0.0.1:8000/docs 查看 API 文档
+```
 
-// 播放直播流
-<RinoIPCPlayView
-    devId={RinoSDK.device.deviceInfo.devId}
-    scene={'live'}
-    cameraIndex={curSelectedCameraIdx}
-    mute={mute}
-    leaveChannelWhenInActive
-/>
+---
 
+## 直接运行（不使用脚本）
+```bash
+cd task_manager
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+PYTHONPATH=. uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-// 播放回放流
-<RinoIPCPlayView
-    devId={RinoSDK.device.deviceInfo.devId}
-    scene={'playback'}
-    cameraIndex={curSelectedCameraIdx}
-    mute={mute}
-    playbackDefaultPlaytime={recordStartTime}
-    leaveChannelWhenInActive
-/>
+---
 
-// 控制回放播放时间
-client.seekPlayback(startTime, startTime + duration);
-// 暂停回放
-client.pausePlayback();
-// 继续回放
-client.resumePlayback();
-```# ZhiLiao-Backend
+## Docker
+- 构建镜像
+```bash
+cd task_manager
+bash scripts/docker-build.sh  # 或：docker build -t task-manager:latest .
+```
+- 运行容器
+```bash
+bash scripts/docker-run.sh  # 或：docker run -p 8000:8000 task-manager:latest
+# 打开 http://127.0.0.1:8000/docs 查看 API 文档
+```
+
+---
+
+## 更多
+- 中文文档：`task_manager/README.md`
+- English: `task_manager/README_EN.md`
