@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant Collector as Task Collector/Publisher
+  participant API as Task Management API
+  participant DB as Database
+  participant Optimizer as Dependency Optimizer Agent
+
+  Collector->>API: POST /api/v1/tasks/integrations/ingest (BatchCreateRequest)
+  API->>DB: Insert tasks + labels + associations
+  DB-->>API: OK (created tasks)
+  API-->>Collector: 200 OK (List<TaskOut>)
+
+  Note over API,Optimizer: Optimizer periodically pulls the task graph
+  Optimizer->>API: GET /api/v1/tasks/integrations/graph
+  API->>DB: SELECT tasks, dependencies
+  DB-->>API: nodes + edges
+  API-->>Optimizer: 200 OK (GraphResponse)
